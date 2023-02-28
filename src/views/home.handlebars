@@ -1,0 +1,58 @@
+<h1>Lista de Productos</h1>
+
+{{#each products}}
+
+<a href="/{{this.id}}"><h2>{{this.nombre}}</h2></a>
+<p>{{this.apellido}}</p>
+<p>{{this.edad}}</p>
+<button class="agregar" data-id="{{this.id}}">Agregar </button>
+
+{{/each}}
+
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    const socket = io();
+    let inputs = document.getElementsByClassName('agregar');
+
+    var agregarProducto = function () {
+        var attribute = this.getAttribute("data-id");
+        socket.emit('agregarProducto', attribute);
+    };
+
+    Array.from(inputs).forEach(function (element) {
+        element.addEventListener('click', agregarProducto);
+    });
+</script>
+
+<!-- 
+Carrito deberia usarse la estetica de carrito. 
+-->
+
+<h1>Carrito</h1>
+
+<p id="log" />
+
+<script>
+    const log = document.getElementById('log');
+
+    var eliminarProducto = function () {
+        var attribute = this.getAttribute("data-id");
+        socket.emit('eliminarProducto', attribute);
+        console.log(attribute);
+    };
+
+    socket.on('carrito', data => {
+        let logs = '';
+        data.carrito.forEach(producto => {
+            logs += `${producto.prod.nombre} ${producto.prod.apellido} <button class="eliminar" data-id="${producto.prod.id}">Eliminar </button> <br/>`
+        })
+        log.innerHTML = logs;
+
+        const inputs = document.getElementsByClassName('eliminar');
+        Array.from(inputs).forEach(function (element) {
+            element.addEventListener('click', eliminarProducto);
+        });
+    });
+
+</script>
